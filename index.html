@@ -108,6 +108,15 @@
     </div>
   </div>
 
+  <h2>8-bit · the melody on the NES</h2>
+  <p class="body" style="margin-top:0">The same Sapphic Mixolydian line, voiced on a synthesised <b>2A03</b> (the NES sound chip): two <b>pulse</b> channels — the duty-cycle squares — a <b>triangle</b> bass, and <b>noise</b> percussion. Pick a "level": each loops as a 10-second-plus snippet, and you can download any as a ~12-second <code class="k">.wav</code>. Same ancient melody, eight chiptune dress-ups.</p>
+  <div class="modes" id="nesbtns" style="justify-content:flex-start"></div>
+  <div class="modes" style="justify-content:flex-start;margin-top:8px">
+    <button class="mode" id="nesstop">■ stop</button>
+    <button class="mode" id="nesdl">⬇ download .wav</button>
+  </div>
+  <div class="np" id="nesnp" style="text-align:left">eight chiptune levels of Sappho's melody — pick one</div>
+
   <h2>what the melody is</h2>
   <p class="body" style="margin-top:0">The line is an <b>evocation</b>, not the lost original — a melodic contour composed in Sappho's mode and laid on her stanza: three <b>hendecasyllables</b> (<code class="k">– ‿ – × – ‿ ‿ – ‿ – –</code>) and a closing <b>adonean</b> (<code class="k">– ‿ ‿ – –</code>), long syllables ≈ twice a short. It rises through the Mixolydian to its characteristic ♭7 and resolves home to the tonic. The pitches are tuned the ancient way (whole tone 9:8, leimma 256:243 from a G lyre-tonic); the timbre is a Karplus-Strong pluck, generated live. Above is its shape — the melodic contour over the stanza.</p>
 
@@ -178,6 +187,87 @@
     g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.05,t+0.4); g.gain.linearRampToValueAtTime(0.0001,t+dur);
     o.connect(lp).connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }); }
 
+  // ══ 8-BIT · NES (2A03 chiptune) ═══════════════════════════════════════
+  var ARRS=[
+    {id:'overworld', name:'Overworld', duty:0.25,  oct:2, tempo:1.0, bass:1, drums:1},
+    {id:'dungeon',   name:'Dungeon',   duty:0.125, oct:1, tempo:0.72,drone:1},
+    {id:'battle',    name:'Battle',    duty:0.5,   oct:2, tempo:1.4, bass:1, drums:1, harmony:1},
+    {id:'arp',       name:'Arpeggio',  duty:0.25,  oct:2, tempo:1.0, bass:1, drums:1, arp:1},
+    {id:'title',     name:'Title screen',duty:0.5, oct:2, tempo:0.86,bass:1, harmony:1, sustain:1},
+    {id:'underwater',name:'Underwater',duty:0.125, oct:2, tempo:0.8, bass:1, vibrato:1},
+    {id:'boss',      name:'Boss',      duty:0.5,   oct:1, tempo:1.5, bass:1, drums:1, harmony:1},
+    {id:'ending',    name:'Ending',    duty:0.25,  oct:2, tempo:0.7, bass:1, harmony:1, sustain:1}
+  ];
+  function getPulse(actx,duty){ actx.__pw=actx.__pw||{}; var k='d'+duty; if(actx.__pw[k])return actx.__pw[k];
+    var n=20, real=new Float32Array(n), imag=new Float32Array(n);
+    for(var i=1;i<n;i++) imag[i]=(2/(i*Math.PI))*Math.sin(i*Math.PI*duty);
+    var w=actx.createPeriodicWave(real,imag); actx.__pw[k]=w; return w; }
+  function nPulse(actx,dest,freq,t,dur,duty,gain,vib){ var o=actx.createOscillator(); o.setPeriodicWave(getPulse(actx,duty));
+    o.frequency.setValueAtTime(freq,t);
+    if(vib){ var lfo=actx.createOscillator(), lg=actx.createGain(); lfo.frequency.value=6.5; lg.gain.value=freq*0.015;
+      lfo.connect(lg).connect(o.frequency); lfo.start(t); lfo.stop(t+dur+0.02); }
+    var g=actx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain,t+0.005);
+    g.gain.setValueAtTime(gain,t+dur*0.75); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g).connect(dest); o.start(t); o.stop(t+dur+0.03); }
+  function nTri(actx,dest,freq,t,dur,gain){ var o=actx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(freq,t);
+    var g=actx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(gain,t+0.01);
+    g.gain.setValueAtTime(gain,t+dur*0.85); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g).connect(dest); o.start(t); o.stop(t+dur+0.02); }
+  function nbuf(actx){ if(actx.__nb)return actx.__nb; var b=actx.createBuffer(1,Math.floor(actx.sampleRate*0.3),actx.sampleRate),
+    d=b.getChannelData(0); for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1; actx.__nb=b; return b; }
+  function nKick(actx,dest,t){ var o=actx.createOscillator(),g=actx.createGain(); o.frequency.setValueAtTime(150,t);
+    o.frequency.exponentialRampToValueAtTime(48,t+0.1); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.6,t+0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g).connect(dest); o.start(t); o.stop(t+0.18); }
+  function nDrum(actx,dest,t,kind){ var s=actx.createBufferSource(); s.buffer=nbuf(actx); var f=actx.createBiquadFilter(),g=actx.createGain();
+    if(kind==='snare'){ f.type='bandpass'; f.frequency.value=1800; g.gain.setValueAtTime(0.18,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
+      s.connect(f).connect(g).connect(dest); s.start(t); s.stop(t+0.12); }
+    else { f.type='highpass'; f.frequency.value=8500; g.gain.setValueAtTime(0.09,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.025);
+      s.connect(f).connect(g).connect(dest); s.start(t); s.stop(t+0.04); } }
+  function renderNes(actx,dest,arr,startT,seconds){
+    var u=0.16/(arr.tempo||1), oct=(arr.oct||2), t=startT, endT=startT+seconds;
+    if(arr.drone) nTri(actx,dest, deg(1)/2*oct, t, seconds, 0.16);
+    while(t<endT){ var lastLine=0;
+      for(var i=0;i<MELODY.length && t<endT;i++){ var nn=MELODY[i];
+        if(nn.line!==lastLine){ if(arr.drums) nDrum(actx,dest,t,'snare'); t+=u*0.7; lastLine=nn.line; }
+        var nd=u*nn.len, f=deg(nn.deg)*oct, ld=nd*(arr.sustain?1.1:0.92);
+        if(arr.arp){ var steps=Math.max(3,Math.round(nd/0.05)), ad=nd/steps, ch=[0,2,4];
+          for(var s2=0;s2<steps;s2++) nPulse(actx,dest, deg(nn.deg+ch[s2%3])*oct, t+s2*ad, ad*1.1, arr.duty, arr.gain||0.16); }
+        else nPulse(actx,dest, f, t, ld, arr.duty, arr.gain||0.18, arr.vibrato);
+        if(arr.harmony) nPulse(actx,dest, deg(nn.deg+2)*oct, t, ld, 0.125, (arr.gain||0.18)*0.55, arr.vibrato);
+        if(arr.bass && !arr.drone && nn.len>=2) nTri(actx,dest, deg(nn.deg)/2*oct, t, nd, 0.4);
+        if(arr.drums){ nDrum(actx,dest,t,'hat'); if(nn.len>=2) nKick(actx,dest,t); }
+        t+=nd;
+      }
+      t+=u*0.6;
+    }
+    return t;
+  }
+  function bufToWav(buf){ var nch=buf.numberOfChannels, sr=buf.sampleRate, n=buf.length, len=n*nch*2+44,
+    ab=new ArrayBuffer(len), v=new DataView(ab);
+    function str(o,s){ for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); }
+    str(0,'RIFF'); v.setUint32(4,len-8,true); str(8,'WAVE'); str(12,'fmt '); v.setUint32(16,16,true);
+    v.setUint16(20,1,true); v.setUint16(22,nch,true); v.setUint32(24,sr,true); v.setUint32(28,sr*nch*2,true);
+    v.setUint16(32,nch*2,true); v.setUint16(34,16,true); str(36,'data'); v.setUint32(40,len-44,true);
+    var off=44; for(var i=0;i<n;i++){ for(var c=0;c<nch;c++){ var x=Math.max(-1,Math.min(1,buf.getChannelData(c)[i]));
+      v.setInt16(off, x<0?x*0x8000:x*0x7FFF, true); off+=2; } }
+    return new Blob([ab],{type:'audio/wav'}); }
+  var nesPlaying=false, nesTimer=null, nesArr=null;
+  function nesStart(arr){ init(); if(ctx.state==='suspended')ctx.resume(); stop(); stopRadio(); nesPlaying=true; nesArr=arr;
+    document.querySelectorAll('.nesbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-id')===arr.id); });
+    document.getElementById('nesnp').innerHTML='♪ NES · <b>'+arr.name+'</b> — the Sapphic melody, chiptuned'; schedNes(); }
+  function schedNes(){ if(!nesPlaying)return; var chunk=12; renderNes(ctx,master,nesArr,ctx.currentTime+0.05,chunk);
+    nesTimer=setTimeout(schedNes,(chunk-0.25)*1000); }
+  function nesStop(){ nesPlaying=false; clearTimeout(nesTimer);
+    document.querySelectorAll('.nesbtn').forEach(function(b){ b.classList.remove('on'); }); }
+  function nesDownload(arr){ init(); var OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    if(!OC){ document.getElementById('nesnp').textContent='offline render not supported in this browser'; return; }
+    var sr=44100, secs=12, oc=new OC(1, Math.floor(sr*secs), sr), mg=oc.createGain(); mg.gain.value=0.85; mg.connect(oc.destination);
+    renderNes(oc, mg, arr, 0.05, secs-0.6);
+    document.getElementById('nesnp').textContent='rendering '+arr.name+' → .wav …';
+    oc.startRendering().then(function(b){ var blob=bufToWav(b), a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='sapphic-nes-'+arr.id+'.wav'; document.body.appendChild(a); a.click(); a.remove();
+      document.getElementById('nesnp').innerHTML='⬇ saved <b>sapphic-nes-'+arr.id+'.wav</b> (~12s)'; }); }
+
   // ── transport ──
   var playing=false, mode='pure', bpm=84, loopTimer=null;
   function shortDur(){ return mode==='pure' ? 0.30 : (60/bpm)*0.5; }   // pure = free metre; modern/radio = on the grid
@@ -203,7 +293,7 @@
     var durMs=(t-t0+0.6)*1000;
     loopTimer=setTimeout(playStanza, durMs);
   }
-  function start(){ init(); if(ctx.state==='suspended')ctx.resume(); playing=true;
+  function start(){ init(); if(ctx.state==='suspended')ctx.resume(); nesStop(); playing=true;
     document.getElementById('play').classList.add('on'); document.getElementById('play').textContent='❚❚ playing';
     np(); playStanza(); }
   function stop(){ playing=false; clearTimeout(loopTimer);
@@ -273,6 +363,13 @@
   document.getElementById('tap').onclick=function(){ var now=performance.now(); taps.push(now); taps=taps.filter(function(x){return now-x<3000;});
     if(taps.length>=2){ var iv=0; for(var i=1;i<taps.length;i++) iv+=taps[i]-taps[i-1]; iv/=(taps.length-1);
       bpm=Math.max(56,Math.min(132,Math.round(60000/iv))); document.getElementById('bpm').value=bpm; document.getElementById('bpmv').textContent=bpm+' BPM'; } };
+
+  // build NES arrangement buttons
+  var nesWrap=document.getElementById('nesbtns');
+  nesWrap.innerHTML=ARRS.map(function(a){ return '<button class="mode nesbtn" data-id="'+a.id+'">◹ '+a.name+'</button>'; }).join('');
+  nesWrap.querySelectorAll('.nesbtn').forEach(function(b){ b.onclick=function(){ var a=ARRS.filter(function(x){return x.id===b.getAttribute('data-id');})[0]; nesStart(a); }; });
+  document.getElementById('nesstop').onclick=function(){ nesStop(); document.getElementById('nesnp').textContent='stopped'; };
+  document.getElementById('nesdl').onclick=function(){ nesDownload(nesArr||ARRS[0]); };
 
   buildContour();
 })();
