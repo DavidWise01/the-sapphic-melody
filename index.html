@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sapphic Melody · Sappho's lost mode, reconstructed — ancient & modern</title>
+<meta name="description" content="The Sapphic Melody — Sappho's lost music reconstructed from the surviving pitch-data: the Mixolydian mode (the scale Aristoxenus credited to her), Pythagorean tuning, the quantitative Sapphic metre, on a Karplus-Strong lyre. Hear it pure, hear it modern (a generated beat under the ancient line), or lay it over free live web-radio. David Lee Wise / Bridge-Burners LLC, ROOT0.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Spectral:ital,wght@0,300;0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sea:#170d20; --sea2:#1f1330; --line:rgba(154,152,166,.16);
+    --lead:#9a98a6; --lead-dim:#6b6678; --parch:#e9e2d2; --parch-dim:#b9b2a3;
+    --gold:#d9a441; --gold-dim:#a87f33; --verd:#73b3a3; --murex:#c2557f; --murex-dim:#9a3d68;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--sea);color:var(--parch);font-family:"Spectral",Georgia,serif;line-height:1.6;
+    -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;justify-content:center;
+    background-image:radial-gradient(1000px 600px at 50% -15%,rgba(194,85,127,.16),transparent 62%),radial-gradient(700px 500px at 85% 10%,rgba(217,164,65,.08),transparent 60%);}
+  .card{max-width:760px;width:100%;padding:40px 24px 60px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--murex)}
+  h1{font-family:"Cormorant Garamond",serif;font-weight:300;font-size:clamp(44px,11vw,76px);margin:8px 0 0;line-height:.94;letter-spacing:-.5px}
+  h1 .gk{display:block;font-size:.26em;color:var(--lead);letter-spacing:.04em;margin-top:10px;font-style:italic}
+  .sub{font-style:italic;font-weight:300;color:var(--parch-dim);font-size:16.5px;margin:18px 0 0;max-width:64ch}
+  .sub b{font-style:normal;font-weight:400;color:var(--parch)} .sub .m{color:var(--murex)} .sub .g{color:var(--gold)}
+  h2{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--murex);
+    margin:34px 0 14px;font-weight:500;border-top:1px solid var(--line);padding-top:18px}
+  p.body{font-size:15px;color:var(--parch-dim);max-width:64ch} p.body b{color:var(--parch)}
+  code.k{font-family:"IBM Plex Mono",monospace;font-size:.9em;color:var(--gold)}
+
+  /* the hero player */
+  .hero{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(31,19,48,.6),rgba(23,13,32,.4));
+    padding:22px;text-align:center}
+  .lyre-svg{width:100%;max-width:560px;height:140px;display:block;margin:0 auto 4px}
+  .bigplay{cursor:pointer;background:var(--murex);color:#1a0f10;border:none;border-radius:40px;
+    font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;letter-spacing:.05em;padding:13px 30px;margin-top:8px;transition:.15s}
+  .bigplay:hover{background:var(--murex-dim);transform:translateY(-1px)}
+  .bigplay.on{background:var(--gold);color:#1a0f10}
+  .np{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--lead);margin-top:12px;min-height:16px;letter-spacing:.04em}
+  .np b{color:var(--gold)}
+
+  .modes{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+  .mode{cursor:pointer;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:8px;color:var(--parch-dim);
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.03em;padding:9px 15px;transition:.15s}
+  .mode:hover{border-color:rgba(194,85,127,.5);color:var(--parch)}
+  .mode.on{border-color:var(--murex);color:var(--murex);background:rgba(194,85,127,.1)}
+
+  .tempo{margin-top:16px;display:none;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;
+    font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--lead)}
+  .tempo.show{display:flex}
+  .tempo input[type=range]{width:160px;accent-color:var(--murex)}
+  .tempo .bpm{color:var(--gold);font-weight:600;min-width:54px}
+  .tempo button{cursor:pointer;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:6px;color:var(--parch);
+    font-family:"IBM Plex Mono",monospace;font-size:11px;padding:6px 12px}
+  .tempo button:hover{border-color:var(--murex)}
+
+  .radio{margin-top:16px;display:none;border-top:1px dashed var(--line);padding-top:16px}
+  .radio.show{display:block}
+  .genres{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .genre{cursor:pointer;background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:20px;color:var(--parch-dim);
+    font-family:"IBM Plex Mono",monospace;font-size:10.5px;padding:5px 13px;transition:.15s}
+  .genre:hover,.genre.on{border-color:var(--verd);color:var(--verd)}
+  .station{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--lead);margin-top:10px;text-align:center;min-height:16px}
+  .station b{color:var(--verd)} .station .err{color:var(--murex)}
+  .radio .vol{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px;font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--lead-dim)}
+  .radio .vol input{width:120px;accent-color:var(--verd)}
+
+  .note{margin-top:32px;border-top:1px solid var(--line);padding-top:16px;font-family:"IBM Plex Mono",monospace;
+    font-size:11px;line-height:1.9;color:var(--lead-dim)}
+  .note b{color:var(--murex);font-weight:500} .note .gd{color:var(--gold)}
+  .foot{display:flex;justify-content:space-between;margin-top:22px;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;color:var(--lead-dim);letter-spacing:.05em;flex-wrap:wrap;gap:6px}
+  .foot a{color:var(--murex);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="eyebrow">ἦχοι Λέσβου · the lyre of Mytilene · reconstructed</div>
+  <h1>The Sapphic Melody<span class="gk">Sappho's lost mode — heard pure, and heard modern</span></h1>
+  <p class="sub">No recording of antiquity exists and Sappho's tunes are lost — but the <b>pitch-data survived</b>. This is her music reconstructed from real ancient material: the <b class="m">Mixolydian</b> mode (the scale Aristoxenus credited to her — "the intense one"), <b>Pythagorean tuning</b>, and the quantitative <b class="m">Sapphic metre</b>, plucked on a synthesised <b>lyre</b>. Hear it pure; hear it <b class="g">modern</b>, with a generated beat under the ancient line; or lay it <b>over free live radio</b>. Press play.</p>
+
+  <div class="hero">
+    <svg class="lyre-svg" id="contour" viewBox="0 0 560 140" aria-hidden="true"></svg>
+    <button class="bigplay" id="play">▶ play the melody</button>
+    <div class="np" id="np">the Mixolydian, on the lyre — Sappho's own mode</div>
+    <div class="modes">
+      <button class="mode on" data-mode="pure">⊙ pure lyre</button>
+      <button class="mode" data-mode="modern">◈ modern beat</button>
+      <button class="mode" data-mode="radio">⊛ live radio + lyre</button>
+    </div>
+    <div class="tempo" id="tempo">
+      <span>tempo</span>
+      <input type="range" id="bpm" min="56" max="132" value="84">
+      <span class="bpm" id="bpmv">84 BPM</span>
+      <button id="tap">tap ·</button>
+    </div>
+    <div class="radio" id="radio">
+      <div class="genres">
+        <button class="genre" data-tag="lofi">lo-fi</button>
+        <button class="genre" data-tag="jazz">jazz</button>
+        <button class="genre" data-tag="ambient">ambient</button>
+        <button class="genre" data-tag="electronic">electronic</button>
+        <button class="genre" data-tag="classical">classical</button>
+      </div>
+      <div class="station" id="station">choose a genre — a free station loads, the lyre rides on top</div>
+      <div class="vol"><span>station vol</span><input type="range" id="rvol" min="0" max="100" value="70"><span>lyre rides over it · set the tempo to match by ear</span></div>
+      <audio id="audio" preload="none"></audio>
+    </div>
+  </div>
+
+  <h2>what the melody is</h2>
+  <p class="body" style="margin-top:0">The line is an <b>evocation</b>, not the lost original — a melodic contour composed in Sappho's mode and laid on her stanza: three <b>hendecasyllables</b> (<code class="k">– ‿ – × – ‿ ‿ – ‿ – –</code>) and a closing <b>adonean</b> (<code class="k">– ‿ ‿ – –</code>), long syllables ≈ twice a short. It rises through the Mixolydian to its characteristic ♭7 and resolves home to the tonic. The pitches are tuned the ancient way (whole tone 9:8, leimma 256:243 from a G lyre-tonic); the timbre is a Karplus-Strong pluck, generated live. Above is its shape — the melodic contour over the stanza.</p>
+
+  <div class="note">
+    <b>what's real.</b> the <span class="gd">Mixolydian octave species</span>, <span class="gd">Pythagorean tuning</span>, and the <span class="gd">quantitative Sapphic metre</span> are the documented ancient material (after the work of Aristoxenus & Cleonides). the lyre and every note are synthesised live in your browser — nothing downloaded. <b>what's not.</b> the specific melody is a faithful <i>evocation</i> in the right mode, tuning, and metre — <b>not</b> a surviving Sapphic tune (none survive with their notation). the "modern beat" is generated here in Sappho's key, so the ancient line and the groove are <i>perfectly</i> in time because both come from this page.
+    <br><b>about Spotify &amp; the radio.</b> a webpage <i>cannot</i> read the audio of Spotify (Free has no streamable SDK at all — Premium-only, DRM) or of most web-radio (cross-origin streams block analysis), so it can't auto-extract their key or beat. honest design: the radio mode <b>plays a real free station and lays the lyre over it</b>, and you lock the lyre's tempo by ear with the slider or the <b>tap</b> button — no fake auto-sync. stations come from the open <a href="https://www.radio-browser.info/" style="color:var(--murex)">Radio-Browser</a> directory (no login).
+  </div>
+
+  <div class="foot">
+    <span>THE SAPPHIC MELODY · Mixolydian · 2026-06-26</span>
+    <span>David Lee Wise · Bridge-Burners LLC · <a href="https://davidwise01.github.io/sounds-of-lesbos/">Sounds of Lesbos ↗</a> · <a href="https://davidwise01.github.io/nine-stream-engine/">the engine that sings ↗</a></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ── tuning (from sounds-of-lesbos): G3 lyre, Pythagorean, Sappho's Mixolydian ──
+  var TONIC=196.00, T=9/8, S=256/243;
+  function steps(a){ var r=[1],c=1; a.forEach(function(s){c*=s;r.push(c);}); return r; }
+  var MIXO=steps([S,T,T,S,T,T,T]);              // 8 ratios incl octave (B–b species — Sappho's)
+  function deg(d){ return TONIC*MIXO[(d-1)%8] * (d>8?2:1); }  // scale degree 1..8(+)
+
+  // ── the Sapphic metre (long=2, short=1) ──
+  var H=[2,1,2,2,2,1,1,2,1,2,2], A=[2,1,1,2,2];
+  // ── the melody: a Mixolydian contour over the stanza (evocation) ──
+  var L1=[5,5,4,5,6,5,4,3,4,5,5], L2=[5,6,5,6,7,6,5,4,5,4,3], L3=[4,5,4,3,4,3,2,3,2,1,2], LA=[3,2,3,2,1];
+  var LINES=[[L1,H],[L2,H],[L3,H],[LA,A]];
+  // flatten into note list {deg,len,line,brk}
+  var MELODY=[]; LINES.forEach(function(ln,li){ var degs=ln[0],lens=ln[1];
+    for(var i=0;i<degs.length;i++) MELODY.push({deg:degs[i],len:lens[i],line:li}); });
+
+  // ── audio ──
+  var ctx=null, master=null, lyreGain=null;
+  function init(){ if(ctx) return;
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain(); master.gain.value=0.9;
+    var conv=ctx.createConvolver(), rate=ctx.sampleRate, len=Math.floor(rate*2.0), ir=ctx.createBuffer(2,len,rate);
+    for(var c=0;c<2;c++){ var d=ir.getChannelData(c); for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6); }
+    conv.buffer=ir; var wet=ctx.createGain(); wet.gain.value=0.22; var dry=ctx.createGain(); dry.gain.value=0.92;
+    lyreGain=ctx.createGain(); lyreGain.gain.value=1.0;
+    lyreGain.connect(master); master.connect(dry).connect(ctx.destination); master.connect(conv); conv.connect(wet).connect(ctx.destination);
+  }
+  function pluck(freq,t,dur,gain){ gain=gain||0.6; var rate=ctx.sampleRate, N=Math.max(2,Math.round(rate/freq)),
+    len=Math.max(N+4,Math.floor(rate*dur)), buf=ctx.createBuffer(1,len,rate), d=buf.getChannelData(0);
+    for(var i=0;i<N;i++) d[i]=Math.random()*2-1; var dc=0.9965;
+    for(var j=N;j<len;j++) d[j]=dc*0.5*(d[j-N]+d[j-N+1]);
+    var src=ctx.createBufferSource(); src.buffer=buf; var g=ctx.createGain();
+    g.gain.setValueAtTime(gain,t); g.gain.exponentialRampToValueAtTime(0.0006,t+dur);
+    src.connect(g).connect(lyreGain); src.start(t); src.stop(t+dur+0.02);
+  }
+  // ── modern bed (generated, in Sappho's key) ──
+  function kick(t){ var o=ctx.createOscillator(), g=ctx.createGain();
+    o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(48,t+0.12);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.9,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+    o.connect(g).connect(master); o.start(t); o.stop(t+0.24); }
+  function hat(t,open){ var b=ctx.createBuffer(1,ctx.sampleRate*0.05,ctx.sampleRate), d=b.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1; var s=ctx.createBufferSource(); s.buffer=b;
+    var hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=7000; var g=ctx.createGain();
+    g.gain.setValueAtTime(open?0.18:0.10,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(open?0.12:0.04));
+    s.connect(hp).connect(g).connect(master); s.start(t); s.stop(t+0.14); }
+  function bass(freq,t,dur){ var o=ctx.createOscillator(), g=ctx.createGain(); o.type='triangle';
+    o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.34,t+0.02);
+    g.gain.setValueAtTime(0.34,t+dur*0.7); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g).connect(master); o.start(t); o.stop(t+dur+0.02); }
+  function pad(freq,t,dur){ [0,0.6].forEach(function(det){ var o=ctx.createOscillator(), g=ctx.createGain(); o.type='sawtooth';
+    o.frequency.value=freq*Math.pow(2,det/1200*5); var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=900;
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.05,t+0.4); g.gain.linearRampToValueAtTime(0.0001,t+dur);
+    o.connect(lp).connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }); }
+
+  // ── transport ──
+  var playing=false, mode='pure', bpm=84, loopTimer=null;
+  function shortDur(){ return mode==='pure' ? 0.30 : (60/bpm)*0.5; }   // pure = free metre; modern/radio = on the grid
+  function highlightInit(){ buildContour(); }
+
+  function playStanza(){
+    if(!playing) return;
+    var u=shortDur(), t=ctx.currentTime+0.06, t0=t, lastLine=0;
+    // modern bed: pad on the tonic for the whole stanza + a kick/hat grid
+    var stanzaLen=0; MELODY.forEach(function(n){ stanzaLen+=n.len*u; });
+    if(mode==='modern'){
+      pad(deg(1)/2, t, stanzaLen+0.4); pad(deg(5)/2, t, stanzaLen+0.4);
+      var beat=(60/bpm), gt=t;
+      for(var b=0; gt < t+stanzaLen; b++){ kick(gt); hat(gt+beat/2,false); hat(gt,b%2===0); gt+=beat; }
+    }
+    // the lyre melody (+ bass on long syllables in modern)
+    MELODY.forEach(function(n){
+      if(n.line!==lastLine){ t+=u*1.1; lastLine=n.line; }   // breath between lines
+      pluck(deg(n.deg), t, u*n.len*1.5, n.len>=2?0.62:0.5);
+      if(mode==='modern' && n.len>=2) bass(deg(n.deg)/2, t, u*n.len);
+      t+=u*n.len;
+    });
+    var durMs=(t-t0+0.6)*1000;
+    loopTimer=setTimeout(playStanza, durMs);
+  }
+  function start(){ init(); if(ctx.state==='suspended')ctx.resume(); playing=true;
+    document.getElementById('play').classList.add('on'); document.getElementById('play').textContent='❚❚ playing';
+    np(); playStanza(); }
+  function stop(){ playing=false; clearTimeout(loopTimer);
+    document.getElementById('play').classList.remove('on'); document.getElementById('play').textContent='▶ play the melody'; }
+  function np(){ var m={pure:'the Mixolydian, on the lyre — Sappho\'s own mode',
+    modern:'the ancient line over a modern beat — same key, perfectly in time',
+    radio:'the lyre, riding over a live free station'}[mode];
+    document.getElementById('np').innerHTML=m; }
+
+  // ── the contour SVG (the melody's shape) ──
+  function buildContour(){
+    var svg=document.getElementById('contour'), W=560, Hh=140, pad=14;
+    var n=MELODY.length, minD=1, maxD=7, pts=[], x=pad, total=0;
+    MELODY.forEach(function(nn){ total+=nn.len; });
+    var step=(W-2*pad)/total, cx=pad;
+    MELODY.forEach(function(nn,i){ var y=Hh-pad-((nn.deg-minD)/(maxD-minD))*(Hh-2*pad-10);
+      pts.push([cx+ (nn.len*step)/2, y, nn]); cx+=nn.len*step; });
+    var path='', dots='';
+    pts.forEach(function(p,i){ path+=(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)+' ';
+      var col=p[2].deg>=7?'#d9a441':(p[2].deg<=2?'#73b3a3':'#c2557f');
+      dots+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(p[2].len>=2?3.4:2.2)+'" fill="'+col+'"/>'; });
+    // line breaks (faint dividers)
+    var div='', cx2=pad, accLine=0;
+    MELODY.forEach(function(nn){ if(nn.line!==accLine){ div+='<line x1="'+cx2.toFixed(1)+'" y1="10" x2="'+cx2.toFixed(1)+'" y2="130" stroke="rgba(154,152,166,.18)"/>'; accLine=nn.line; } cx2+=nn.len*step; });
+    svg.innerHTML=div+'<path d="'+path+'" fill="none" stroke="rgba(194,85,127,.5)" stroke-width="1.5"/>'+dots
+      +'<text x="'+pad+'" y="12" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b6678">♭7</text>'
+      +'<text x="'+pad+'" y="134" font-family="IBM Plex Mono,monospace" font-size="8" fill="#6b6678">tonic</text>';
+  }
+
+  // ── modes ──
+  function setMode(m){ mode=m;
+    document.querySelectorAll('.mode').forEach(function(b){ b.classList.toggle('on',b.getAttribute('data-mode')===m); });
+    document.getElementById('tempo').classList.toggle('show', m!=='pure');
+    document.getElementById('radio').classList.toggle('show', m==='radio');
+    if(m!=='radio') stopRadio();
+    np();
+    if(playing){ clearTimeout(loopTimer); playStanza(); }
+  }
+
+  // ── radio (Radio-Browser, free, no login) ──
+  var audio=document.getElementById('audio');
+  function stopRadio(){ try{ audio.pause(); }catch(e){} }
+  function loadRadio(tag,btn){
+    document.querySelectorAll('.genre').forEach(function(b){ b.classList.toggle('on',b===btn); });
+    var st=document.getElementById('station'); st.innerHTML='searching free '+tag+' stations…';
+    var ctrl=new AbortController(); var to=setTimeout(function(){ctrl.abort();},7000);
+    fetch('https://de1.api.radio-browser.info/json/stations/bytagexact/'+encodeURIComponent(tag)+'?limit=15&hidebroken=true&order=clickcount&reverse=true',{signal:ctrl.signal})
+      .then(function(r){ return r.json(); })
+      .then(function(list){ clearTimeout(to);
+        var s=(list||[]).find(function(x){ return x.url_resolved && /^https/.test(x.url_resolved); }) || (list||[])[0];
+        if(!s){ st.innerHTML='<span class="err">no playable '+tag+' station found — try another genre</span>'; return; }
+        audio.src=s.url_resolved||s.url; audio.volume=document.getElementById('rvol').value/100;
+        audio.play().then(function(){ st.innerHTML='▶ <b>'+(s.name||'station').trim().slice(0,48)+'</b> · '+(s.countrycode||'')+' · the lyre is riding on top'; })
+          .catch(function(){ st.innerHTML='<span class="err">browser blocked autoplay — press play once, then pick a genre</span>'; });
+      })
+      .catch(function(){ clearTimeout(to); st.innerHTML='<span class="err">could not reach the station directory (offline, or blocked here) — the pure &amp; modern modes still work</span>'; });
+  }
+
+  // ── wiring ──
+  document.getElementById('play').onclick=function(){ playing?stop():start(); };
+  document.querySelectorAll('.mode').forEach(function(b){ b.onclick=function(){ setMode(b.getAttribute('data-mode')); if(!playing) start(); }; });
+  document.getElementById('bpm').oninput=function(){ bpm=+this.value; document.getElementById('bpmv').textContent=bpm+' BPM'; };
+  document.getElementById('rvol').oninput=function(){ audio.volume=this.value/100; };
+  document.querySelectorAll('.genre').forEach(function(b){ b.onclick=function(){ loadRadio(b.getAttribute('data-tag'),b); }; });
+  // tap tempo
+  var taps=[];
+  document.getElementById('tap').onclick=function(){ var now=performance.now(); taps.push(now); taps=taps.filter(function(x){return now-x<3000;});
+    if(taps.length>=2){ var iv=0; for(var i=1;i<taps.length;i++) iv+=taps[i]-taps[i-1]; iv/=(taps.length-1);
+      bpm=Math.max(56,Math.min(132,Math.round(60000/iv))); document.getElementById('bpm').value=bpm; document.getElementById('bpmv').textContent=bpm+' BPM'; } };
+
+  buildContour();
+})();
+</script>
+</body>
+</html>
